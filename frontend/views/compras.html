@@ -1,0 +1,185 @@
+<!-- frontend/views/compras.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Compras - Sistema Tienda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1e293b;
+      color: #f1f5f9;
+      padding: 30px;
+    }
+    h1 { margin-top: 0; }
+    .contenedor { max-width: 1000px; margin: 0 auto; }
+    .caja {
+      background-color: #0f172a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    label {
+      font-size: 13px;
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background-color: #1e293b;
+      color: #f1f5f9;
+      margin-bottom: 12px;
+    }
+    .fila-form {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    #infoProducto, #resumenLinea {
+      font-size: 13px;
+      color: #86efac;
+      margin-top: -6px;
+      margin-bottom: 10px;
+      grid-column: 1 / -1;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background-color: #1d4ed8; }
+    button:disabled { background-color: #334155; cursor: not-allowed; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #0f172a;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    th { background-color: #1e293b; }
+    .btn-quitar-compra {
+      background: none;
+      color: #f87171;
+      padding: 0;
+      font-size: 16px;
+    }
+    .fila-total-compra {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    #btnRegistrarCompra {
+      width: 100%;
+      padding: 14px;
+      background-color: #16a34a;
+      font-size: 16px;
+    }
+    #btnRegistrarCompra:hover { background-color: #15803d; }
+    .buscador-producto-contenedor {
+      position: relative;
+    }
+    #resultadosBusquedaProducto {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 10;
+      margin-top: 2px;
+    }
+    .resultado-item {
+      padding: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #334155;
+    }
+    .resultado-item:hover {
+      background-color: #334155;
+    }
+    .resultado-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+</head>
+<body>
+  <div id="globalSidebar"></div>
+  <div class="contenedor">
+    <h1>Registro de Compras / Ingreso de Stock</h1>
+
+    <div class="caja">
+      <label>Proveedor (opcional)</label>
+      <input type="text" id="proveedor" placeholder="Nombre del proveedor">
+
+      <div class="fila-form">
+        <div class="buscador-producto-contenedor">
+          <label>Producto</label>
+          <input type="text" id="buscadorProductoCompra" placeholder="Escribe para buscar..." autocomplete="off">
+          <div id="resultadosBusquedaProducto"></div>
+        </div>
+        <div>
+          <label>Cantidad (<span id="nombreEmpaqueLabel">paquete(s)</span>)</label>
+          <input type="number" id="cantidadPaquetes" step="0.01" placeholder="Ej: 3">
+        </div>
+        <div>
+          <label>Unidades por empaque</label>
+          <input type="number" id="unidadesPorPaquete" step="0.01" value="1">
+        </div>
+        <div>
+          <label>Costo total por empaque (Bs)</label>
+          <input type="number" id="costoPaquete" step="0.01" placeholder="Ej: 90">
+        </div>
+        <div id="infoProducto"></div>
+        <div id="resumenLinea"></div>
+      </div>
+
+      <button id="btnAgregarItem">+ Agregar a la compra</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad comprada</th>
+          <th>Unidades totales</th>
+          <th>Costo por unidad</th>
+          <th>Subtotal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tablaCarritoCompra"></tbody>
+    </table>
+
+    <div class="fila-total-compra">
+      <span>Total de la compra</span>
+      <span id="totalCompra">Bs 0.00</span>
+    </div>
+
+    <button id="btnRegistrarCompra" disabled>Registrar Compra</button>
+  </div>
+
+  <script src="/assets/js/compras.js"></script>
+  <script src="/assets/js/sidebar.js"></script>
+</body>
+</html>

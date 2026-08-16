@@ -1,0 +1,168 @@
+<!-- frontend/views/login.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema Tienda - Login</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #1e293b;
+      font-family: Arial, sans-serif;
+      color: #f1f5f9;
+    }
+    .caja {
+      background-color: #0f172a;
+      padding: 40px;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 340px;
+    }
+    .logo-login {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      margin-bottom: 8px;
+    }
+    .subtitulo { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      background-color: #1e293b;
+      color: #f1f5f9;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+    }
+    button:hover { background-color: #1d4ed8; }
+    #mensaje {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      display: none;
+    }
+    .ok { background-color: #14532d; color: #86efac; display: block !important; }
+    .error { background-color: #7f1d1d; color: #fca5a5; display: block !important; }
+    .oculto { display: none; }
+  </style>
+</head>
+<body>
+  <div class="caja">
+    <img src="/assets/img/logotienda.png" alt="Logo tienda" class="logo-login">
+
+    <div id="vistaLogin">
+      <p class="subtitulo">Inicia sesión para continuar</p>
+      <input type="text" id="loginUsuario" placeholder="Usuario">
+      <input type="password" id="loginPassword" placeholder="Contraseña">
+      <button onclick="iniciarSesion()">Ingresar</button>
+    </div>
+
+    <div id="vistaRegistroInicial" class="oculto">
+      <p class="subtitulo">Primer uso: crea tu usuario administrador</p>
+      <input type="text" id="regNombre" placeholder="Tu nombre completo">
+      <input type="text" id="regUsuario" placeholder="Usuario (para iniciar sesión)">
+      <input type="password" id="regPassword" placeholder="Contraseña (mínimo 4 caracteres)">
+      <button onclick="crearAdministrador()">Crear Administrador</button>
+    </div>
+      <p>v1.0.0</p>
+
+    <div id="mensaje"></div>
+  </div>
+
+  <script>
+    const API_USUARIOS = 'http://localhost:3000/api/usuarios';
+
+    function mostrarMensaje(texto, tipo) {
+      const div = document.getElementById('mensaje');
+      div.textContent = texto;
+      div.className = tipo;
+    }
+
+    async function verificarSiHayUsuarios() {
+      try {
+        const res = await fetch(`${API_USUARIOS}/existe-alguno`);
+        const data = await res.json();
+
+        if (data.ok && !data.existe) {
+          document.getElementById('vistaLogin').classList.add('oculto');
+          document.getElementById('vistaRegistroInicial').classList.remove('oculto');
+        }
+      } catch (error) {
+        mostrarMensaje('No se pudo conectar con el servidor', 'error');
+      }
+    }
+
+    async function crearAdministrador() {
+      const nombre = document.getElementById('regNombre').value;
+      const usuario = document.getElementById('regUsuario').value;
+      const password = document.getElementById('regPassword').value;
+
+      const res = await fetch(API_USUARIOS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, usuario, password })
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        mostrarMensaje('Administrador creado. Ahora inicia sesión.', 'ok');
+        setTimeout(() => {
+          document.getElementById('vistaRegistroInicial').classList.add('oculto');
+          document.getElementById('vistaLogin').classList.remove('oculto');
+          document.getElementById('mensaje').className = '';
+        }, 1500);
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    async function iniciarSesion() {
+      const usuario = document.getElementById('loginUsuario').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const res = await fetch(`${API_USUARIOS}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario, password })
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        localStorage.setItem('usuarioActivo', JSON.stringify(data.usuario));
+        mostrarMensaje(`Bienvenido, ${data.usuario.nombre}`, 'ok');
+        setTimeout(() => {
+          window.location.href = '/pos.html';
+        }, 700);
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    document.getElementById('loginPassword').addEventListener('keyup', e => {
+      if (e.key === 'Enter') iniciarSesion();
+    });
+
+    verificarSiHayUsuarios();
+  </script>
+</body>
+</html>

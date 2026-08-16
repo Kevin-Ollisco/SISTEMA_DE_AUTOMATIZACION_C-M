@@ -1,0 +1,225 @@
+<!-- frontend/views/categorias.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Categorías - Sistema Tienda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1e293b;
+      color: #f1f5f9;
+      padding: 30px;
+    }
+    h1 {
+      margin-top: 0;
+    }
+    .contenedor {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .formulario {
+      background-color: #0f172a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .formulario input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      background-color: #1e293b;
+      color: #f1f5f9;
+    }
+    .formulario button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .formulario button:hover {
+      background-color: #1d4ed8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #0f172a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      background-color: #1e293b;
+    }
+    .btn-accion {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 8px;
+    }
+    .btn-editar {
+      color: #60a5fa;
+    }
+    .btn-eliminar {
+      color: #f87171;
+    }
+    #mensaje {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .ok {
+      background-color: #14532d;
+      color: #86efac;
+      display: block !important;
+    }
+    .error {
+      background-color: #7f1d1d;
+      color: #fca5a5;
+      display: block !important;
+    }
+  </style>
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+</head>
+<body>
+  <div id="globalSidebar"></div>
+  <div class="contenedor">
+    <h1>Gestión de Categorías</h1>
+
+    <div id="mensaje"></div>
+
+    <div class="formulario">
+      <input type="hidden" id="categoriaId">
+      <input type="text" id="nombre" placeholder="Nombre de la categoría">
+      <input type="text" id="descripcion" placeholder="Descripción (opcional)">
+      <button id="btnGuardar" onclick="guardarCategoria()">Crear Categoría</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaCategorias"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api/categorias';
+
+    function mostrarMensaje(texto, tipo) {
+      const div = document.getElementById('mensaje');
+      div.textContent = texto;
+      div.className = tipo;
+      setTimeout(() => {
+        div.className = '';
+        div.textContent = '';
+      }, 3000);
+    }
+
+    async function cargarCategorias() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      const tbody = document.getElementById('tablaCategorias');
+      tbody.innerHTML = '';
+
+      if (!data.ok) {
+        mostrarMensaje('Error al cargar categorías', 'error');
+        return;
+      }
+
+      data.categorias
+        .filter(c => c.activo === 1)
+        .forEach(categoria => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${categoria.nombre}</td>
+            <td>${categoria.descripcion || '-'}</td>
+            <td>
+              <button class="btn-accion btn-editar" onclick="editarCategoria(${categoria.id}, '${categoria.nombre.replace(/'/g, "\\'")}', '${(categoria.descripcion || '').replace(/'/g, "\\'")}')">Editar</button>
+              <button class="btn-accion btn-eliminar" onclick="eliminarCategoria(${categoria.id})">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(fila);
+        });
+    }
+
+    function editarCategoria(id, nombre, descripcion) {
+      document.getElementById('categoriaId').value = id;
+      document.getElementById('nombre').value = nombre;
+      document.getElementById('descripcion').value = descripcion;
+      document.getElementById('btnGuardar').textContent = 'Guardar Cambios';
+    }
+
+    function limpiarFormulario() {
+      document.getElementById('categoriaId').value = '';
+      document.getElementById('nombre').value = '';
+      document.getElementById('descripcion').value = '';
+      document.getElementById('btnGuardar').textContent = 'Crear Categoría';
+    }
+
+    async function guardarCategoria() {
+      const id = document.getElementById('categoriaId').value;
+      const nombre = document.getElementById('nombre').value;
+      const descripcion = document.getElementById('descripcion').value;
+
+      if (!nombre.trim()) {
+        mostrarMensaje('El nombre es obligatorio', 'error');
+        return;
+      }
+
+      const metodo = id ? 'PUT' : 'POST';
+      const url = id ? `${API_URL}/${id}` : API_URL;
+
+      const res = await fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, descripcion })
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        mostrarMensaje(id ? 'Categoría actualizada' : 'Categoría creada', 'ok');
+        limpiarFormulario();
+        cargarCategorias();
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    async function eliminarCategoria(id) {
+      if (!confirm('¿Seguro que deseas eliminar esta categoría?')) return;
+
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+
+      if (data.ok) {
+        mostrarMensaje('Categoría eliminada', 'ok');
+        cargarCategorias();
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    cargarCategorias();
+  </script>
+  <script src="/assets/js/sidebar.js"></script>
+</body>
+</html>

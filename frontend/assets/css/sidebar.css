@@ -1,0 +1,92 @@
+body.has-sidebar {
+  margin-left: 250px;
+}
+
+#globalSidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #0b1220;
+  padding: 20px;
+  box-sizing: border-box;
+  border-right: 1px solid #122031;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+#globalSidebar .logo {
+  font-weight: bold;
+  font-size: 18px;
+  color: #e2e8f0;
+  margin-bottom: 12px;
+}
+
+#globalSidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+#globalSidebar nav a {
+  color: #cbd5e1;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+#globalSidebar nav a.active,
+#globalSidebar nav a:hover {
+  background-color: #1e293b;
+  color: #fff;
+}
+
+#globalSidebar nav a svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  fill: currentColor;
+}
+
+#globalSidebar .user-info {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+
+#globalSidebar .user-info button {
+  margin-top: 10px;
+  width: 100%;
+  background: #334155;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#globalSidebar .user-info button:hover {
+  background: #475569;
+}
+
+body.with-sidebar #globalSidebar {
+  display: block;
+}
+.logo-tienda {
+  margin-top: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.logo-tienda img {
+  width: 120px;
+  max-width: 80%;
+  height: auto;
+}

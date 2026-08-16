@@ -1,0 +1,139 @@
+<!-- frontend/views/backups.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Copias de Seguridad - Sistema Tienda</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #0f172a;
+      color: #f1f5f9;
+      padding: 30px;
+    }
+    .encabezado {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    .encabezado h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    a.volver {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    a.volver:hover { color: #f1f5f9; }
+
+    .tarjeta {
+      background-color: #1e293b;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+    .tarjeta p {
+      color: #94a3b8;
+      font-size: 13px;
+      margin: 0 0 15px 0;
+    }
+    .btn-crear {
+      background-color: #16a34a;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .btn-crear:hover { background-color: #15803d; }
+    .btn-crear:disabled { background-color: #334155; cursor: not-allowed; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #334155;
+    }
+    th {
+      color: #94a3b8;
+      font-weight: normal;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    .acciones button {
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-right: 6px;
+    }
+    .btn-descargar { background-color: #334155; color: #f1f5f9; }
+    .btn-descargar:hover { background-color: #475569; }
+    .btn-restaurar { background-color: #b91c1c; color: white; }
+    .btn-restaurar:hover { background-color: #991b1b; }
+
+    .vacio {
+      color: #64748b;
+      font-size: 13px;
+      padding: 20px 0;
+      text-align: center;
+    }
+    .aviso {
+      font-size: 12px;
+      color: #fbbf24;
+      margin-top: 15px;
+    }
+    #mensajeEstado {
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+    #mensajeEstado.ok { color: #4ade80; }
+    #mensajeEstado.error { color: #f87171; }
+  </style>
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+</head>
+<body>
+  <div id="globalSidebar"></div>
+  <div class="encabezado">
+    <h1>Copias de Seguridad</h1>
+    <a class="volver" href="/pos.html">&larr; Volver al POS</a>
+  </div>
+
+  <div class="tarjeta">
+    <p>Crea una copia de tu base de datos con un clic. Podés descargarla para guardarla en un USB o en la nube.</p>
+    <button class="btn-crear" id="btnCrearBackup">Crear copia de seguridad ahora</button>
+    <div id="mensajeEstado"></div>
+  </div>
+
+  <div class="tarjeta">
+    <table>
+      <thead>
+        <tr>
+          <th>Archivo</th>
+          <th>Fecha</th>
+          <th>Tamaño</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaBackups"></tbody>
+    </table>
+    <div class="vacio" id="mensajeVacio" style="display:none;">Todavía no hay copias de seguridad.</div>
+    <div class="aviso">⚠️ Restaurar una copia reemplaza tu base de datos actual (se guarda un respaldo automático antes de hacerlo) y reinicia el sistema.</div>
+  </div>
+
+  <script src="/assets/js/sidebar.js"></script>
+  <script src="/assets/js/backups.js"></script>
+</body>
+</html>

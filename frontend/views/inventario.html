@@ -1,0 +1,416 @@
+<!-- frontend/views/inventario.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario - Sistema Tienda</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1e293b;
+      color: #f1f5f9;
+      padding: 30px;
+    }
+    h1 { margin-top: 0; }
+    .contenedor { max-width: 1000px; margin: 0 auto; }
+    .formulario {
+      background-color: #0f172a;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .formulario label {
+      font-size: 13px;
+      color: #94a3b8;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .formulario input, .formulario select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background-color: #1e293b;
+      color: #f1f5f9;
+    }
+    .campo-completo { grid-column: 1 / -1; }
+    .ganancia-box {
+      grid-column: 1 / -1;
+      background-color: #14532d;
+      color: #86efac;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    .formulario button {
+      grid-column: 1 / -1;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .formulario button:hover { background-color: #1d4ed8; }
+    .buscador {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: none;
+      background-color: #0f172a;
+      color: #f1f5f9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #0f172a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+    th { background-color: #1e293b; }
+    .stock-bajo { color: #f87171; font-weight: bold; }
+    .btn-accion { background: none; border: none; cursor: pointer; font-size: 14px; margin-right: 8px; }
+    .btn-editar { color: #60a5fa; }
+    .btn-eliminar { color: #f87171; }
+    #mensaje {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .ok { background-color: #14532d; color: #86efac; display: block !important; }
+    .error { background-color: #7f1d1d; color: #fca5a5; display: block !important; }
+  </style>
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+</head>
+<body>
+  <div id="globalSidebar"></div>
+  <div class="contenedor">
+    <h1>Inventario de Productos</h1>
+
+    <div id="mensaje"></div>
+
+    <div class="formulario">
+      <input type="hidden" id="productoId">
+
+      <div>
+        <label>Código (opcional)</label>
+        <input type="text" id="codigo" placeholder="Ej: 001">
+      </div>
+
+      <div>
+        <label>Nombre del producto</label>
+        <input type="text" id="nombre" placeholder="Ej: Coca Cola 2L">
+      </div>
+
+      <div>
+        <label>Categoría</label>
+        <select id="categoriaId"></select>
+      </div>
+
+      <div>
+        <label>Unidad de medida</label>
+        <select id="unidadMedida">
+          <option value="unidad">Unidad</option>
+          <option value="kg">Kilogramo (kg)</option>
+          <option value="g">Gramo (g)</option>
+          <option value="litro">Litro (L)</option>
+          <option value="ml">Mililitro (ml)</option>
+          <option value="paquete">Paquete</option>
+          <option value="caja">Caja</option>
+        </select>
+      </div>
+
+      <div>
+        <label>¿Cómo lo compras por mayor?</label>
+        <select id="nombreEmpaque">
+          <option value="unidad">No compro por mayor (unidad a unidad)</option>
+          <option value="caja">Caja</option>
+          <option value="quintal">Quintal</option>
+          <option value="docena">Docena</option>
+          <option value="bolsa">Bolsa</option>
+          <option value="paquete">Paquete</option>
+          <option value="fardo">Fardo</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Unidades de venta que trae ese empaque</label>
+        <input type="text" id="unidadesPorEmpaque" data-decimal="true" value="1" placeholder="Ej: 12, 100">
+      </div>
+
+      <div>
+        <label>Precio de costo (por unidad de venta)</label>
+        <input type="text" id="precioCosto" data-decimal="true" oninput="calcularGanancia()">
+      </div>
+
+      <div>
+        <label>Precio de venta (por unidad de venta)</label>
+        <input type="text" id="precioVenta" data-decimal="true" oninput="calcularGanancia()">
+      </div>
+
+      <div>
+        <label>Stock actual</label>
+        <input type="text" id="stock" data-decimal="true" value="0">
+      </div>
+
+      <div>
+        <label>Stock mínimo (alerta)</label>
+        <input type="text" id="stockMinimo" data-decimal="true" value="0">
+      </div>
+
+      <div class="campo-completo" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="esRetornable" style="width:auto;" onchange="toggleCampoEnvase()">
+        <label style="margin:0;">Es un producto retornable (envase con depósito, ej: botella de vidrio)</label>
+      </div>
+
+      <div id="campoPrecioEnvase" style="display:none; grid-column: 1 / -1;">
+        <label>Precio del depósito por envase (Bs)</label>
+        <input type="text" id="precioEnvase" data-decimal="true" placeholder="Ej: 5">
+      </div>
+
+      <div class="ganancia-box" id="gananciaBox">
+        Ganancia por unidad: Bs 0.00
+      </div>
+
+      <button id="btnGuardar" onclick="guardarProducto()">Crear Producto</button>
+    </div>
+
+    <input type="text" class="buscador" id="buscador" placeholder="Buscar por nombre o código..." oninput="cargarProductos()">
+
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Categoría</th>
+          <th>Costo</th>
+          <th>Venta</th>
+          <th>Ganancia</th>
+          <th>Stock</th>
+          <th>Envases Prestados</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaProductos"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_PRODUCTOS = 'http://localhost:3000/api/productos';
+    const API_CATEGORIAS = 'http://localhost:3000/api/categorias';
+
+    function mostrarMensaje(texto, tipo) {
+      const div = document.getElementById('mensaje');
+      div.textContent = texto;
+      div.className = tipo;
+      setTimeout(() => {
+        div.className = '';
+        div.textContent = '';
+      }, 3000);
+    }
+
+    function toggleCampoEnvase() {
+      const marcado = document.getElementById('esRetornable').checked;
+      document.getElementById('campoPrecioEnvase').style.display = marcado ? 'block' : 'none';
+    }
+
+    function calcularGanancia() {
+      const costo = parseFloat(document.getElementById('precioCosto').value) || 0;
+      const venta = parseFloat(document.getElementById('precioVenta').value) || 0;
+      const unidadesPorEmpaque = parseFloat(document.getElementById('unidadesPorEmpaque').value) || 1;
+      const ganancia = venta - costo;
+      const costoEmpaque = costo * unidadesPorEmpaque;
+
+      document.getElementById('gananciaBox').innerHTML =
+        `Ganancia por unidad: Bs ${ganancia.toFixed(2)} · ` +
+        `Costo aproximado del empaque completo (${unidadesPorEmpaque} unidades): Bs ${costoEmpaque.toFixed(2)}`;
+    }
+
+    async function cargarCategoriasEnSelect() {
+      const res = await fetch(API_CATEGORIAS);
+      const data = await res.json();
+      const select = document.getElementById('categoriaId');
+      select.innerHTML = '<option value="">Sin categoría</option>';
+
+      if (data.ok) {
+        data.categorias
+          .filter(c => c.activo === 1)
+          .forEach(categoria => {
+            const opcion = document.createElement('option');
+            opcion.value = categoria.id;
+            opcion.textContent = categoria.nombre;
+            select.appendChild(opcion);
+          });
+      }
+    }
+
+    async function cargarProductos() {
+      const busqueda = document.getElementById('buscador').value;
+      const url = busqueda ? `${API_PRODUCTOS}?busqueda=${encodeURIComponent(busqueda)}` : API_PRODUCTOS;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const tbody = document.getElementById('tablaProductos');
+      tbody.innerHTML = '';
+
+      if (!data.ok) {
+        mostrarMensaje('Error al cargar productos', 'error');
+        return;
+      }
+
+      data.productos.forEach(producto => {
+        const ganancia = producto.precio_venta - producto.precio_costo;
+        const stockBajo = producto.stock <= producto.stock_minimo;
+
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+          <td>${producto.codigo || '-'}</td>
+          <td>${producto.nombre}</td>
+          <td>${producto.categoria_nombre || '-'}</td>
+          <td>Bs ${producto.precio_costo.toFixed(2)}</td>
+          <td>Bs ${producto.precio_venta.toFixed(2)}</td>
+          <td>Bs ${ganancia.toFixed(2)}</td>
+          <td class="${stockBajo ? 'stock-bajo' : ''}">${producto.stock} ${producto.unidad_medida}</td>
+          <td>
+            ${producto.es_retornable === 1
+              ? `${producto.envases_prestados} ${producto.envases_prestados > 0 ? `<button class="btn-accion btn-editar" onclick="devolverEnvase(${producto.id})">Registrar devolución</button>` : ''}`
+              : '-'}
+          </td>
+          <td>
+            <button class="btn-accion btn-editar" onclick='editarProducto(${JSON.stringify(producto)})'>Editar</button>
+            <button class="btn-accion btn-eliminar" onclick="eliminarProducto(${producto.id})">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    async function devolverEnvase(id) {
+      const res = await fetch(`${API_PRODUCTOS}/${id}/devolver-envase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cantidad: 1 })
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        mostrarMensaje('Devolución de envase registrada', 'ok');
+        cargarProductos();
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    function editarProducto(producto) {
+      document.getElementById('productoId').value = producto.id;
+      document.getElementById('codigo').value = producto.codigo || '';
+      document.getElementById('nombre').value = producto.nombre;
+      document.getElementById('categoriaId').value = producto.categoria_id || '';
+      document.getElementById('unidadMedida').value = producto.unidad_medida;
+      document.getElementById('nombreEmpaque').value = producto.nombre_empaque || 'unidad';
+      document.getElementById('unidadesPorEmpaque').value = producto.unidades_por_empaque || 1;
+      document.getElementById('esRetornable').checked = producto.es_retornable === 1;
+      document.getElementById('precioEnvase').value = producto.precio_envase || 0;
+      toggleCampoEnvase();
+      document.getElementById('precioCosto').value = producto.precio_costo;
+      document.getElementById('precioVenta').value = producto.precio_venta;
+      document.getElementById('stock').value = producto.stock;
+      document.getElementById('stockMinimo').value = producto.stock_minimo;
+      document.getElementById('btnGuardar').textContent = 'Guardar Cambios';
+      calcularGanancia();
+      window.scrollTo(0, 0);
+    }
+
+    function limpiarFormulario() {
+      document.getElementById('productoId').value = '';
+      document.getElementById('codigo').value = '';
+      document.getElementById('nombre').value = '';
+      document.getElementById('categoriaId').value = '';
+      document.getElementById('unidadMedida').value = 'unidad';
+      document.getElementById('nombreEmpaque').value = 'unidad';
+      document.getElementById('unidadesPorEmpaque').value = 1;
+      document.getElementById('esRetornable').checked = false;
+      document.getElementById('precioEnvase').value = '';
+      toggleCampoEnvase();
+      document.getElementById('precioCosto').value = '';
+      document.getElementById('precioVenta').value = '';
+      document.getElementById('stock').value = 0;
+      document.getElementById('stockMinimo').value = 0;
+      document.getElementById('btnGuardar').textContent = 'Crear Producto';
+      calcularGanancia();
+    }
+
+    async function guardarProducto() {
+      const id = document.getElementById('productoId').value;
+
+      const payload = {
+        codigo: document.getElementById('codigo').value,
+        nombre: document.getElementById('nombre').value,
+        categoria_id: document.getElementById('categoriaId').value || null,
+        unidad_medida: document.getElementById('unidadMedida').value,
+        nombre_empaque: document.getElementById('nombreEmpaque').value,
+        unidades_por_empaque: document.getElementById('unidadesPorEmpaque').value,
+        es_retornable: document.getElementById('esRetornable').checked,
+        precio_envase: document.getElementById('precioEnvase').value || 0,
+        precio_costo: document.getElementById('precioCosto').value,
+        precio_venta: document.getElementById('precioVenta').value,
+        stock: document.getElementById('stock').value,
+        stock_minimo: document.getElementById('stockMinimo').value
+      };
+
+      if (!payload.nombre.trim()) {
+        mostrarMensaje('El nombre es obligatorio', 'error');
+        return;
+      }
+
+      const metodo = id ? 'PUT' : 'POST';
+      const url = id ? `${API_PRODUCTOS}/${id}` : API_PRODUCTOS;
+
+      const res = await fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        mostrarMensaje(id ? 'Producto actualizado' : 'Producto creado', 'ok');
+        limpiarFormulario();
+        cargarProductos();
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    async function eliminarProducto(id) {
+      if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
+
+      const res = await fetch(`${API_PRODUCTOS}/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+
+      if (data.ok) {
+        mostrarMensaje('Producto eliminado', 'ok');
+        cargarProductos();
+      } else {
+        mostrarMensaje(data.mensaje, 'error');
+      }
+    }
+
+    cargarCategoriasEnSelect();
+    cargarProductos();
+  </script>
+<script src="/assets/js/sidebar.js"></script>
+</body>
+</html>

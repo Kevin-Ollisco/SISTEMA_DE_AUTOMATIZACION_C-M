@@ -1,0 +1,89 @@
+<!-- frontend/views/reportes.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reportes - Sistema Tienda</title>
+  <link rel="stylesheet" href="/assets/css/reportes.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+</head>
+<body>
+  <div id="globalSidebar"></div>
+  <div class="contenedor">
+    <h1>Reportes y Métricas</h1>
+
+    <div class="filtros">
+      <button id="btn-hoy" class="activo" onclick="seleccionarPeriodo('hoy')">Hoy</button>
+      <button id="btn-semana" onclick="seleccionarPeriodo('semana')">Esta Semana</button>
+      <button id="btn-mes" onclick="seleccionarPeriodo('mes')">Este Mes</button>
+      <button id="btn-personalizado" onclick="seleccionarPeriodo('personalizado')">Rango Personalizado</button>
+
+      <div class="rango-personalizado" id="rangoPersonalizado">
+        <input type="date" id="fechaDesde">
+        <span>hasta</span>
+        <input type="date" id="fechaHasta">
+      </div>
+    </div>
+
+    <div class="tarjetas">
+      <div class="tarjeta">
+        <div class="etiqueta">Cantidad de Ventas</div>
+        <div class="valor" id="cantidadVentas">0</div>
+      </div>
+      <div class="tarjeta">
+        <div class="etiqueta">Total Vendido</div>
+        <div class="valor" id="totalVendido">Bs 0.00</div>
+      </div>
+      <div class="tarjeta costo">
+        <div class="etiqueta">Costo de Productos Vendidos</div>
+        <div class="valor" id="costoTotal">Bs 0.00</div>
+      </div>
+      <div class="tarjeta ganancia">
+        <div class="etiqueta">Ganancia Bruta</div>
+        <div class="valor" id="gananciaBruta">Bs 0.00</div>
+      </div>
+      <div class="tarjeta gastos">
+        <div class="etiqueta">Gastos Registrados</div>
+        <div class="valor" id="totalGastos">Bs 0.00</div>
+      </div>
+      <div class="tarjeta ganancia">
+        <div class="etiqueta">Ganancia Neta</div>
+        <div class="valor" id="gananciaNeta">Bs 0.00</div>
+      </div>
+    </div>
+
+    <div class="seccion">
+      <h2>Productos Más Vendidos</h2>
+      <table>
+        <thead>
+          <tr><th>Producto</th><th>Cantidad Vendida</th><th>Total Generado</th></tr>
+        </thead>
+        <tbody id="tablaProductosMasVendidos"></tbody>
+      </table>
+    </div>
+
+    <div class="seccion">
+      <h2>Ventas por Método de Pago</h2>
+      <table>
+        <thead>
+          <tr><th>Método</th><th>Cantidad</th><th>Total</th></tr>
+        </thead>
+        <tbody id="tablaMetodosPago"></tbody>
+      </table>
+    </div>
+
+    <div class="seccion">
+      <h2>⚠️ Productos con Stock Bajo</h2>
+      <table>
+        <thead>
+          <tr><th>Producto</th><th>Stock Actual</th><th>Stock Mínimo</th></tr>
+        </thead>
+        <tbody id="tablaStockBajo"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/assets/js/sidebar.js"></script>
+  <script src="/assets/js/reportes.js"></script>
+</body>
+</html>
